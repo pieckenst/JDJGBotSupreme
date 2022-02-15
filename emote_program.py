@@ -13,7 +13,7 @@ async def get(message):
   for e in custom_emoji_ids:
     ex_vaild = bool(0)
     for ex in extentions:
-      url = "https://cdn.discordapp.com/emojis/"+str(e)+"."+str(ex)
+      url = f'https://cdn.discordapp.com/emojis/{str(e)}.{str(ex)}'
       async with aiohttp.ClientSession() as cs:
         async with cs.get(url) as tmpImage:
           if(tmpImage.status)==200 and not ex_vaild:
@@ -22,22 +22,18 @@ async def get(message):
   return images
 
 def get2(message):
-  names = []
   full_emojis=re.findall(r':\w*:\d*',message.content)
   custom_emoji_names = [(e.split(':')[1].replace('>', '')) for e in full_emojis]
-  for e in custom_emoji_names:
-    names.append(e)
-  return names
+  return list(custom_emoji_names)
 
 async def get_emoji_id(emoji_id):
   images = []
   extentions = ["gif","png"]
-  custom_emoji_ids = []
-  custom_emoji_ids.append(emoji_id)
+  custom_emoji_ids = [emoji_id]
   for e in custom_emoji_ids:
     ex_vaild = bool(0)
     for ex in extentions:
-      url = "https://cdn.discordapp.com/emojis/"+str(e)+"."+str(ex)
+      url = f'https://cdn.discordapp.com/emojis/{str(e)}.{str(ex)}'
       async with aiohttp.ClientSession() as cs:
         async with cs.get(url) as tmpImage:
           if(tmpImage.status)==200 and not ex_vaild:
@@ -71,7 +67,11 @@ async def default_emojis(message):
       embed.add_field(name="Name:",value=emojis_used)
       embed.add_field(name="Unicode:",value=unicode)
       embed.add_field(name="unicode url",value=f"[site]({unicode_site})")
-      embed.add_field(name="Credit:",value=f"[[Site 1]](https://emojis.readthedocs.io/en/latest/api.html) [[Site 2]](https://github.com/Rapptz/RoboDanny/blob/rewrite/cogs/meta.py#L250-L264)")
+      embed.add_field(
+          name="Credit:",
+          value=
+          '[[Site 1]](https://emojis.readthedocs.io/en/latest/api.html) [[Site 2]](https://github.com/Rapptz/RoboDanny/blob/rewrite/cogs/meta.py#L250-L264)',
+      )
       embed.set_image(url=url)
-      embed.set_footer(text=f"click the title for more unicode data")
+      embed.set_footer(text='click the title for more unicode data')
     await message.channel.send(embed=embed)

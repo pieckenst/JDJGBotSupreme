@@ -7,9 +7,12 @@ class Events(commands.Cog):
 
   @commands.Cog.listener()
   async def on_guild_join(self, guild_fetched):
-    channels = [channel for channel in guild_fetched.channels]
-    roles = roles= [role for role in guild_fetched.roles]
-    embed = discord.Embed(title="Bot just joined: "+str(guild_fetched.name), color=random.randint(0,16777215))
+    channels = list(guild_fetched.channels)
+    roles = roles = list(guild_fetched.roles)
+    embed = discord.Embed(
+        title=f'Bot just joined: {str(guild_fetched.name)}',
+        color=random.randint(0, 16777215),
+    )
     embed.set_thumbnail(url = guild_fetched.icon_url)
     embed.add_field(name='Server Name:',value=f'{guild_fetched.name}')
     embed.add_field(name='Server ID:',value=f'{guild_fetched.id}')
@@ -24,9 +27,12 @@ class Events(commands.Cog):
 
   @commands.Cog.listener()
   async def on_guild_remove(self, guild_fetched):
-    channels = [channel for channel in guild_fetched.channels]
-    roles = roles= [role for role in guild_fetched.roles]
-    embed = discord.Embed(title="Bot just left: "+str(guild_fetched.name), color=random.randint(0,16777215))
+    channels = list(guild_fetched.channels)
+    roles = roles = list(guild_fetched.roles)
+    embed = discord.Embed(
+        title=f'Bot just left: {str(guild_fetched.name)}',
+        color=random.randint(0, 16777215),
+    )
     embed.set_thumbnail(url = guild_fetched.icon_url)
     embed.add_field(name='Server Name:',value=f'{guild_fetched.name}')
     embed.add_field(name='Server ID:',value=f'{guild_fetched.id}')

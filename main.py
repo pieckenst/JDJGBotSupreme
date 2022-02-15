@@ -87,59 +87,56 @@ slur_censor = []
 
 class BetterMemberConverter(commands.Converter):
   async def convert(self,ctx,argument):
-    try:
-      user = await commands.MemberConverter().convert(ctx,argument)
-    except commands.MemberNotFound:
-      user = None
+      try:
+        user = await commands.MemberConverter().convert(ctx,argument)
+      except commands.MemberNotFound:
+        user = None
 
-    if user == None:
-      tag = re.match(r"#?(\d{4})",argument)
-      if tag:
-        if ctx.guild:
-          test=discord.utils.get(ctx.guild.members, discriminator = tag.group(1))
-          if test:
-            user = test
-          if not test:
-            user=ctx.author
-        if ctx.guild is None:
-          user = await BetterUserconverter().convert(ctx,argument)
-          if user:
-            user = client.get_user(user.id)
-          if user is None:
-            user = ctx.author
-               
-    return user
+      if user is None:
+          if tag := re.match(r"#?(\d{4})", argument):
+              if ctx.guild:
+                test=discord.utils.get(ctx.guild.members, discriminator = tag.group(1))
+                if test:
+                  user = test
+                if not test:
+                  user=ctx.author
+              if ctx.guild is None:
+                user = await BetterUserconverter().convert(ctx,argument)
+                if user:
+                  user = client.get_user(user.id)
+                if user is None:
+                  user = ctx.author
+
+      return user
 
 class BetterUserconverter(commands.Converter):
   async def convert(self, ctx, argument):
-    try:
-     user=await commands.UserConverter().convert(ctx,argument)
-    except commands.UserNotFound:
-      user = None
-    if not user and ctx.guild:
-      user=ctx.guild.get_member_named(argument)
-    if user == None:
+      try:
+       user=await commands.UserConverter().convert(ctx,argument)
+      except commands.UserNotFound:
+        user = None
+      if not user and ctx.guild:
+        user=ctx.guild.get_member_named(argument)
+      if user is None:
 
-      match2 = re.match(r'<@&([0-9]+)>$',argument)
-      if match2:
-        argument2=match2.group(1)
-        role=ctx.guild.get_role(int(argument2))
-        if role.is_bot_managed:
-            user=role.tags.bot_id
-            user = client.get_user(user)
-            if user is None:
-              user = await client.fetch_user(user)
+          if match2 := re.match(r'<@&([0-9]+)>$', argument):
+              argument2=match2.group(1)
+              role=ctx.guild.get_role(int(argument2))
+              if role.is_bot_managed:
+                  user=role.tags.bot_id
+                  user = client.get_user(user)
+                  if user is None:
+                    user = await client.fetch_user(user)
 
-    if user == None:
-      tag = re.match(r"#?(\d{4})",argument)
-      if tag:
-        test=discord.utils.get(client.users, discriminator = tag.group(1))
-        if test:
-          user = test
-        if not test:
-          user=ctx.author
-          
-    return user
+      if user is None:
+          if tag := re.match(r"#?(\d{4})", argument):
+              test=discord.utils.get(client.users, discriminator = tag.group(1))
+              if test:
+                user = test
+              if not test:
+                user=ctx.author
+
+      return user
 
 async def triggered_converter(url,ctx):
   sr_client=sr_api.Client(session=client.aiohttp_session)
@@ -381,32 +378,32 @@ async def facepalm(ctx,*, Member: BetterMemberConverter=None):
 
 @client.command(help="takes a .png attachment or your avatar and makes a triggered version.")
 async def triggered(ctx):
-  y = 0
-  if len(ctx.message.attachments) > 0:
-    for x in ctx.message.attachments:
-      if x.filename.endswith(".png"):
-        url = x.url
-        await triggered_converter(url,ctx)
-        y = y + 1
-      if not x.filename.endswith(".png"):
-        pass
+    y = 0
+    if len(ctx.message.attachments) > 0:
+        for x in ctx.message.attachments:
+            if x.filename.endswith(".png"):
+                url = x.url
+                await triggered_converter(url,ctx)
+                y += 1
+            if not x.filename.endswith(".png"):
+              pass
 
-  if len(ctx.message.attachments) == 0 or y == 0:
-    url = ctx.author.avatar_url_as(format="png")
-    await triggered_converter(url,ctx)
+    if len(ctx.message.attachments) == 0 or y == 0:
+      url = ctx.author.avatar_url_as(format="png")
+      await triggered_converter(url,ctx)
 
 @client.command(help="uploads your emojis into a mystbin link")
 async def look_at(ctx):
-  if isinstance(ctx.message.channel, discord.TextChannel):
-    message_emojis = ""
-    for x in ctx.guild.emojis:
-      message_emojis = message_emojis+" "+str(x)+"\n"
-    mystbin_client = mystbin.Client(session=client.aiohttp_session)
-    paste = await mystbin_client.post(message_emojis)
-    await ctx.send(paste.url)
-    
-  if isinstance(ctx.channel,discord.DMChannel):
-    await ctx.send("We can't use that in DMS")
+    if isinstance(ctx.message.channel, discord.TextChannel):
+        message_emojis = ""
+        for x in ctx.guild.emojis:
+            message_emojis = f'{message_emojis} {str(x)}' + "\n"
+        mystbin_client = mystbin.Client(session=client.aiohttp_session)
+        paste = await mystbin_client.post(message_emojis)
+        await ctx.send(paste.url)
+
+    if isinstance(ctx.channel,discord.DMChannel):
+      await ctx.send("We can't use that in DMS")
 
 @client.command()
 async def headpat(ctx):
@@ -415,29 +412,28 @@ async def headpat(ctx):
 
 @client.command(help="a way to look up minecraft usernames",brief="using the official minecraft api, looking up minecraft information has never been easier(tis only gives minecraft account history relating to name changes)")
 async def mchistory(ctx,*,args=None):
-  import asuna_api
-  asuna = asuna_api.Client(session=client.aiohttp_session)
-  minecraft_info=await asuna.mc_user(args)
-  
-  if not args:
-    await ctx.send("Please pick a minecraft user.")
+    import asuna_api
+    asuna = asuna_api.Client(session=client.aiohttp_session)
+    minecraft_info=await asuna.mc_user(args)
 
-  if args:
-    embed=discord.Embed(title=f"Minecraft Username: {args}",color=random.randint(0, 16777215))
-    embed.set_footer(text=f"Minecraft UUID: {minecraft_info.uuid}")
-    embed.add_field(name="Orginal Name:",value=minecraft_info.name)
-    y = 0
-    for x in minecraft_info.history:
-      if y > 0:
-        embed.add_field(name=f"Username:\n{x['name']}",value=f"Date Changed:\n{x['changedToAt']}\n \nTime Changed: \n {x['timeChangedAt']}")
+    if not args:
+      await ctx.send("Please pick a minecraft user.")
 
-      y = y + 1
-    embed.set_author(name=f"Requested by {ctx.author}",icon_url=(ctx.author.avatar_url))
-    await ctx.send(embed=embed)
+    if args:
+        embed=discord.Embed(title=f"Minecraft Username: {args}",color=random.randint(0, 16777215))
+        embed.set_footer(text=f"Minecraft UUID: {minecraft_info.uuid}")
+        embed.add_field(name="Orginal Name:",value=minecraft_info.name)
+        for y, x in enumerate(minecraft_info.history):
+            if y > 0:
+              embed.add_field(name=f"Username:\n{x['name']}",value=f"Date Changed:\n{x['changedToAt']}\n \nTime Changed: \n {x['timeChangedAt']}")
+
+        embed.set_author(name=f"Requested by {ctx.author}",icon_url=(ctx.author.avatar_url))
+        await ctx.send(embed=embed)
 
 @client.command(help="a command to backup text",brief="please don't upload any private files that aren't meant to be seen")
 async def text_backup(ctx):
-  if ctx.message.attachments:
+    if not ctx.message.attachments:
+        return
     for x in ctx.message.attachments:
       file=await x.read()
       if len(file) > 0:
@@ -526,81 +522,77 @@ async def milk(ctx):
 
 @client.command(help="gives you who the owner is.")
 async def owner(ctx):
-  info = await client.application_info()
-  if info.team is None:
-    owner = info.owner.id
-  if info.team:
-    owner = info.team.owner_id
+    info = await client.application_info()
+    if info.team is None:
+      owner = info.owner.id
+    if info.team:
+      owner = info.team.owner_id
 
-  support_guild=client.get_guild(736422329399246990)
-  owner=support_guild.get_member(owner)
-  if owner.bot:
-    user_type = "Bot"
-  if not owner.bot:
-    user_type = "User"
+    support_guild=client.get_guild(736422329399246990)
+    owner=support_guild.get_member(owner)
+    if owner.bot:
+      user_type = "Bot"
+    if not owner.bot:
+      user_type = "User"
 
-  guilds_list=[guild for guild in client.guilds if guild.get_member(owner.id)]
-  if not guilds_list:
-    guild_list = "None"
+    guilds_list=[guild for guild in client.guilds if guild.get_member(owner.id)]
+    if not guilds_list:
+      guild_list = "None"
 
-  x = 0
-  for g in guilds_list:
-    if x < 1:
-      guild_list = g.name
-    if x > 0:
-      guild_list = guild_list + f", {g.name}"
-    x = x + 1
-  
-  if owner:
-    nickname = str(owner.nick)
-    joined_guild = owner.joined_at.strftime('%m/%d/%Y %H:%M:%S')
-    status = str(owner.status).upper()
-    highest_role = owner.roles[-1]
-  
-  if owner is None:
-    nickname = "None"
-    joined_guild = "N/A"
-    status = "Unknown"
-    for guild in client.guilds:
-      member=guild.get_member(owner.id)
-      if member:
-        status=str(member.status).upper()
-        break
-    highest_role = "None Found"
-  
-  embed=discord.Embed(title=f"Bot Owner: {owner}",description=f"Type: {user_type}", color=random.randint(0, 16777215),timestamp=ctx.message.created_at)
-  embed.add_field(name="Username:", value = owner.name)
-  embed.add_field(name="Discriminator:",value=owner.discriminator)
-  embed.add_field(name="Nickname: ", value = nickname)
-  embed.add_field(name="Joined Discord: ",value = (owner.created_at.strftime('%m/%d/%Y %H:%M:%S')))
-  embed.add_field(name="Joined Guild: ",value = joined_guild)
-  embed.add_field(name="Part of Guilds:", value=guild_list)
-  embed.add_field(name="ID:",value=owner.id)
-  embed.add_field(name="Status:",value=status)
-  embed.add_field(name="Highest Role:",value=highest_role)
-  embed.set_image(url=owner.avatar_url)
-  await ctx.send(embed=embed)
-  try:
-    await RankSystem.GetStatus(ctx.message,owner)
-  except:
-    await ctx.send("User not in Rank System")
+    for x, g in enumerate(guilds_list):
+        if x < 1:
+          guild_list = g.name
+        if x > 0:
+            guild_list = f'{guild_list}, {g.name}'
+    if owner:
+      nickname = str(owner.nick)
+      joined_guild = owner.joined_at.strftime('%m/%d/%Y %H:%M:%S')
+      status = str(owner.status).upper()
+      highest_role = owner.roles[-1]
+
+    if owner is None:
+        nickname = "None"
+        joined_guild = "N/A"
+        status = "Unknown"
+        for guild in client.guilds:
+            if member := guild.get_member(owner.id):
+                status=str(member.status).upper()
+                break
+        highest_role = "None Found"
+
+    embed=discord.Embed(title=f"Bot Owner: {owner}",description=f"Type: {user_type}", color=random.randint(0, 16777215),timestamp=ctx.message.created_at)
+    embed.add_field(name="Username:", value = owner.name)
+    embed.add_field(name="Discriminator:",value=owner.discriminator)
+    embed.add_field(name="Nickname: ", value = nickname)
+    embed.add_field(name="Joined Discord: ",value = (owner.created_at.strftime('%m/%d/%Y %H:%M:%S')))
+    embed.add_field(name="Joined Guild: ",value = joined_guild)
+    embed.add_field(name="Part of Guilds:", value=guild_list)
+    embed.add_field(name="ID:",value=owner.id)
+    embed.add_field(name="Status:",value=status)
+    embed.add_field(name="Highest Role:",value=highest_role)
+    embed.set_image(url=owner.avatar_url)
+    await ctx.send(embed=embed)
+    try:
+      await RankSystem.GetStatus(ctx.message,owner)
+    except:
+      await ctx.send("User not in Rank System")
 
 @client.command(help="a command to give information about the team",brief="this command works if you are in team otherwise it will just give the owner.")
 async def team(ctx):
-  information=await client.application_info()
-  if information.team == None:
-    true_owner=information.owner
-    team_members = []
-  if information.team != None:
-    true_owner = information.team.owner
-    team_members = information.team.members
-  embed=discord.Embed(title=information.name,color=random.randint(0, 16777215))
-  embed.add_field(name="Owner",value=true_owner)
-  embed.set_footer(text=f"ID: {true_owner.id}")
-  embed.set_image(url=(information.icon_url))
-  for x in team_members:
-    embed.add_field(name=x,value=x.id)
-  await ctx.send(embed=embed)
+    information=await client.application_info()
+    if information.team is None:
+        true_owner=information.owner
+        team_members = []
+    if information.team != None:
+      true_owner = information.team.owner
+      team_members = information.team.members
+    embed=discord.Embed(title=information.name,color=random.randint(0, 16777215))
+    embed.add_field(name="Owner",value=true_owner)
+    embed.set_footer(text=f"ID: {true_owner.id}")
+    embed.set_image(url=(information.icon_url))
+    for x in team_members:
+      embed.add_field(name=x,value=x.id)
+    await ctx.send(embed=embed)
 
 @client.command(help="a command to send I hate spam.")
 async def spam(ctx):
@@ -622,41 +614,37 @@ async def file(ctx):
 
 @client.command(help="a command meant to flip coins",brief="commands to flip coins, etc.")
 async def coin(ctx, *, args = None):
-  if args:
-    value = random.choice([True,False]) 
-    if args.lower().startswith("h") and value:
-      win = True
-    elif args.lower().startswith("t") and not value:
-      win = True
-    elif args.lower().startswith("h") and not value:
-      win = False
-    elif args.lower().startswith("t") and value:
-      win = False    
-    else:
-      await ctx.send("Please use heads or Tails as a value.")
-      return
-    
-    if(value):
-      pic_name = "heads"
-    else:
-      pic_name ="Tails"
+    if args:
+        value = random.choice([True,False])
+        if args.lower().startswith("h") and value:
+          win = True
+        elif args.lower().startswith("t") and not value:
+          win = True
+        elif args.lower().startswith("h") and not value:
+          win = False
+        elif args.lower().startswith("t") and value:
+          win = False    
+        else:
+          await ctx.send("Please use heads or Tails as a value.")
+          return
 
-    url_dic = {"heads":"https://i.imgur.com/MzdU5Z7.png","Tails":"https://i.imgur.com/qTf1owU.png"}
+        pic_name = "heads" if value else "Tails"
+        url_dic = {"heads":"https://i.imgur.com/MzdU5Z7.png","Tails":"https://i.imgur.com/qTf1owU.png"}
 
-    embed = discord.Embed(title="coin flip",color=random.randint(0, 16777215))
-    embed.set_author(name=f"{ctx.author}",icon_url=(ctx.author.avatar_url))
-    embed.add_field(name="The Coin Flipped: "+("heads" if value else "tails"),value=f"You guessed: {args}")
-    embed.set_image(url=url_dic[pic_name])
+        embed = discord.Embed(title="coin flip",color=random.randint(0, 16777215))
+        embed.set_author(name=f"{ctx.author}",icon_url=(ctx.author.avatar_url))
+        embed.add_field(name="The Coin Flipped: "+("heads" if value else "tails"),value=f"You guessed: {args}")
+        embed.set_image(url=url_dic[pic_name])
 
-    if win:
-      embed.add_field(name="Result: ",value="You won")
-    else:
-      embed.add_field(name="Result: ",value="You lost")
-    
-    await ctx.send(embed=embed)
+        if win:
+          embed.add_field(name="Result: ",value="You won")
+        else:
+          embed.add_field(name="Result: ",value="You lost")
 
-  if args is None:
-    await ctx.send("example: \n```test*coin heads``` \nnot ```test*coin```")
+        await ctx.send(embed=embed)
+
+    if args is None:
+      await ctx.send("example: \n```test*coin heads``` \nnot ```test*coin```")
 
 @client.command()
 async def stats(ctx):
@@ -666,46 +654,46 @@ async def stats(ctx):
   await ctx.send(embed=embed)
 
 async def guildinfo(ctx,guild):
-  bots = 0
-  users = 0
-  for x in guild.members:
-    if x.bot is True:
-      bots = bots + 1
-    if x.bot is False:
-      users = users + 1
-  static_emojis = 0
-  animated_emojis = 0
-  usable_emojis = 0
-  for x in guild.emojis:
-    if x.animated is True:
-      animated_emojis = animated_emojis + 1
-    if x.animated is False:
-      static_emojis = static_emojis + 1
-    if x.available is True:
-      usable_emojis = usable_emojis + 1
-  
-  embed = discord.Embed(title="Guild Info:",color=random.randint(0, 16777215))
-  embed.add_field(name="Server Name:",value=guild.name)
-  embed.add_field(name="Server ID:",value=guild.id)
-  embed.add_field(name="Server region",value=guild.region)
-  embed.add_field(name="Server created at:",value=f"{guild.created_at} UTC")
-  embed.add_field(name="Server Owner:",value=guild.owner)
-  embed.add_field(name="Member Count:",value=guild.member_count)
-  embed.add_field(name="Users:",value=users)
-  embed.add_field(name="Bots:",value=bots)
-  embed.add_field(name="Channel Count:",value=len(guild.channels))
-  embed.add_field(name="Role Count:",value=len(guild.roles))
-  embed.set_thumbnail(url=(guild.icon_url))
-  embed.add_field(name="Emoji Limit:",value=guild.emoji_limit)
-  embed.add_field(name="Max File Size:",value=f"{guild.filesize_limit/1000000} MB")
-  embed.add_field(name="Shard ID:",value=guild.shard_id)
-  embed.add_field(name="Animated Icon",value=guild.is_icon_animated())
-  embed.add_field(name="Static Emojis",value=static_emojis)
-  embed.add_field(name="Animated Emojis",value=animated_emojis)
-  embed.add_field(name="Total Emojis:",value=f"{len(guild.emojis)}/{guild.emoji_limit*2}")
-  embed.add_field(name="Usable Emojis",value=usable_emojis)
+    bots = 0
+    users = 0
+    for x in guild.members:
+        if x.bot is True:
+            bots += 1
+        if x.bot is False:
+            users += 1
+    static_emojis = 0
+    animated_emojis = 0
+    usable_emojis = 0
+    for x in guild.emojis:
+        if x.animated is True:
+            animated_emojis += 1
+        if x.animated is False:
+            static_emojis += 1
+        if x.available is True:
+            usable_emojis += 1
 
-  await ctx.send(embed=embed)
+    embed = discord.Embed(title="Guild Info:",color=random.randint(0, 16777215))
+    embed.add_field(name="Server Name:",value=guild.name)
+    embed.add_field(name="Server ID:",value=guild.id)
+    embed.add_field(name="Server region",value=guild.region)
+    embed.add_field(name="Server created at:",value=f"{guild.created_at} UTC")
+    embed.add_field(name="Server Owner:",value=guild.owner)
+    embed.add_field(name="Member Count:",value=guild.member_count)
+    embed.add_field(name="Users:",value=users)
+    embed.add_field(name="Bots:",value=bots)
+    embed.add_field(name="Channel Count:",value=len(guild.channels))
+    embed.add_field(name="Role Count:",value=len(guild.roles))
+    embed.set_thumbnail(url=(guild.icon_url))
+    embed.add_field(name="Emoji Limit:",value=guild.emoji_limit)
+    embed.add_field(name="Max File Size:",value=f"{guild.filesize_limit/1000000} MB")
+    embed.add_field(name="Shard ID:",value=guild.shard_id)
+    embed.add_field(name="Animated Icon",value=guild.is_icon_animated())
+    embed.add_field(name="Static Emojis",value=static_emojis)
+    embed.add_field(name="Animated Emojis",value=animated_emojis)
+    embed.add_field(name="Total Emojis:",value=f"{len(guild.emojis)}/{guild.emoji_limit*2}")
+    embed.add_field(name="Usable Emojis",value=usable_emojis)
+
+    await ctx.send(embed=embed)
 
 @client.command(help="gives you info about a guild",aliases=["server_info","guild_fetch","guild_info","fetch_guild",])
 async def serverinfo(ctx,*,args=None):
@@ -753,32 +741,26 @@ async def pi(ctx):
 
 @client.command(help="a command to get the closest user.")
 async def closest_user(ctx,*,args=None):
-  if args is None:
-    await ctx.send("please specify a user")
-  if args:
-    from difflib import SequenceMatcher
-    userNearest = discord.utils.get(client.users,name=args)
-    user_nick = discord.utils.get(client.users,display_name=args)
-    if userNearest is None:
-      userNearest = sorted(client.users, key=lambda x: SequenceMatcher(None, x.name, args).ratio())[-1]
-    if user_nick is None:
-      user_nick = sorted(client.users, key=lambda x: SequenceMatcher(None, x.display_name,args).ratio())[-1]
-    await ctx.send(f"Username: {userNearest}")
-    await ctx.send(f"Display name: {user_nick}")
-  
-  if isinstance(ctx.channel, discord.TextChannel):
-    member_list = []
-    for x in ctx.guild.members:
-      if x.nick is None:
-        pass
-      if x.nick:
-        member_list.append(x)
-    
-    nearest_server_nick = sorted(member_list, key=lambda x: SequenceMatcher(None, x.nick,args).ratio())[-1] 
-    await ctx.send(f"Nickname: {nearest_server_nick}")
+    if args is None:
+      await ctx.send("please specify a user")
+    if args:
+      from difflib import SequenceMatcher
+      userNearest = discord.utils.get(client.users,name=args)
+      user_nick = discord.utils.get(client.users,display_name=args)
+      if userNearest is None:
+        userNearest = sorted(client.users, key=lambda x: SequenceMatcher(None, x.name, args).ratio())[-1]
+      if user_nick is None:
+        user_nick = sorted(client.users, key=lambda x: SequenceMatcher(None, x.display_name,args).ratio())[-1]
+      await ctx.send(f"Username: {userNearest}")
+      await ctx.send(f"Display name: {user_nick}")
 
-  if isinstance(ctx.channel,discord.DMChannel):
-    await ctx.send("You unforantely don't get the last value.") 
+    if isinstance(ctx.channel, discord.TextChannel):
+        member_list = [x for x in ctx.guild.members if x.nick]
+        nearest_server_nick = sorted(member_list, key=lambda x: SequenceMatcher(None, x.nick,args).ratio())[-1]
+        await ctx.send(f"Nickname: {nearest_server_nick}")
+
+    if isinstance(ctx.channel,discord.DMChannel):
+      await ctx.send("You unforantely don't get the last value.") 
 
 @client.command(help="a command to send wink gifs",brief="you select a user to send it to and it will send it to you lol")
 async def wink(ctx,*, Member: BetterMemberConverter=None):
@@ -815,65 +797,63 @@ async def wink(ctx,*, Member: BetterMemberConverter=None):
 
 @client.command(aliases=["user_info", "user-info", "ui", "whois"], brief="a command that gives information on users", help="this can work with mentions, ids, usernames, and even full names.")
 async def userinfo(ctx, *, user: BetterUserconverter = None):
-  user = user or ctx.author
-  user_type = ['User', 'Bot'][user.bot]
-  
-  if ctx.guild:
-    member_version = await client.getch_member(ctx.guild, user.id)
+    user = user or ctx.author
+    user_type = ['User', 'Bot'][user.bot]
 
-    if member_version:
-      nickname = str(member_version.nick)
-      joined_guild = member_version.joined_at.strftime('%m/%d/%Y %H:%M:%S')
-      status = str(member_version.status).upper()
-      highest_role = member_version.top_role
-      
-    if not member_version:
+    if ctx.guild:
+        member_version = await client.getch_member(ctx.guild, user.id)
 
-      nickname = str(member_version)
+        if member_version:
+          nickname = str(member_version.nick)
+          joined_guild = member_version.joined_at.strftime('%m/%d/%Y %H:%M:%S')
+          status = str(member_version.status).upper()
+          highest_role = member_version.top_role
 
-      joined_guild = "N/A"
-      status = "Unknown"
+        if not member_version:
 
-      for guild in client.guilds:
-        member=guild.get_member(user.id)
-        if member:
-          status=str(member.status).upper()
-          break
-          
-      highest_role = "None Found"
+            nickname = str(member_version)
 
-  if not ctx.guild:
-    nickname = "None"
-    joined_guild = "N/A"
-    status = "Unknown"
-    for guild in client.guilds:
-      member=guild.get_member(user.id)
-      if member:
-        status=str(member.status).upper()
-        break
-    highest_role = "None Found"
-  
-  guilds_list=[guild for guild in client.guilds if guild.get_member(user.id) and guild.get_member(ctx.author.id)]
-  if not guilds_list:
-    guild_list = "None"
+            joined_guild = "N/A"
+            status = "Unknown"
 
-  if guilds_list:
-    guild_list= ", ".join(map(str, guilds_list))
+            for guild in client.guilds:
+                if member := guild.get_member(user.id):
+                    status=str(member.status).upper()
+                    break
 
-  embed=discord.Embed(title=f"{user}",description=f"Type: {user_type}", color=random.randint(0, 16777215),timestamp=ctx.message.created_at)
-  embed.add_field(name="Username: ", value = user.name)
-  embed.add_field(name="Discriminator:",value=user.discriminator)
-  embed.add_field(name="Nickname: ", value = nickname)
-  embed.add_field(name="Joined Discord: ",value = (user.created_at.strftime('%m/%d/%Y %H:%M:%S')))
-  embed.add_field(name="Joined Guild: ",value = joined_guild)
-  embed.add_field(name="Mutual Guilds:", value=guild_list)
-  embed.add_field(name="ID:",value=user.id)
-  embed.add_field(name="Status:",value=status)
-  embed.add_field(name="Highest Role:",value=highest_role)
-  embed.set_image(url=user.avatar_url)
-  await ctx.send(embed=embed)
+            highest_role = "None Found"
 
-  await RankSystem.GetStatus(ctx.message,user)
+    if not ctx.guild:
+        nickname = "None"
+        joined_guild = "N/A"
+        status = "Unknown"
+        for guild in client.guilds:
+            if member := guild.get_member(user.id):
+                status=str(member.status).upper()
+                break
+        highest_role = "None Found"
+
+    guilds_list=[guild for guild in client.guilds if guild.get_member(user.id) and guild.get_member(ctx.author.id)]
+    if not guilds_list:
+      guild_list = "None"
+
+    if guilds_list:
+      guild_list= ", ".join(map(str, guilds_list))
+
+    embed=discord.Embed(title=f"{user}",description=f"Type: {user_type}", color=random.randint(0, 16777215),timestamp=ctx.message.created_at)
+    embed.add_field(name="Username: ", value = user.name)
+    embed.add_field(name="Discriminator:",value=user.discriminator)
+    embed.add_field(name="Nickname: ", value = nickname)
+    embed.add_field(name="Joined Discord: ",value = (user.created_at.strftime('%m/%d/%Y %H:%M:%S')))
+    embed.add_field(name="Joined Guild: ",value = joined_guild)
+    embed.add_field(name="Mutual Guilds:", value=guild_list)
+    embed.add_field(name="ID:",value=user.id)
+    embed.add_field(name="Status:",value=status)
+    embed.add_field(name="Highest Role:",value=highest_role)
+    embed.set_image(url=user.avatar_url)
+    await ctx.send(embed=embed)
+
+    await RankSystem.GetStatus(ctx.message,user)
 
 @client.command(help="a command to give a list of servers(owner only)")
 async def servers(ctx):

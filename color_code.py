@@ -173,9 +173,7 @@ def get(_user):
   user = DatabaseConfig.db.color_code.find_one({"user_id":_user.id})
   return user['color']
 def valid_cc(_user):
-  if(get(_user)=="NULL"):
-    return 0
-  return 1
+  return 0 if (get(_user)=="NULL") else 1
 def save(_user, color_code):
   VaildateUser(_user)
   user = DatabaseConfig.db.color_code.find_one({"user_id":_user.id})
@@ -196,8 +194,8 @@ async def veiw(_user,channel, wire,ins = 0):
 
  # await channel.send("Color Code of "+_user.name+"```"
   #+_color_code+"```")
- #await channel.send(file=discord.File('render.png'))
- async with channel.typing():
+   #await channel.send(file=discord.File('render.png'))
+  async with channel.typing():
     jdjg = 0
     if(_user=="NULL"):
       _color_code = ""
@@ -211,7 +209,7 @@ async def veiw(_user,channel, wire,ins = 0):
     marioRender = _3D.mario()
     marioRender.render(_color_code,wire,jdjg)
     try:
-      await channel.send("Color Code of "+_user.name+"```"+_color_code+"```")
+      await channel.send(f'Color Code of {_user.name}```{_color_code}```')
     except:
       banana = 1
     await channel.send(file=discord.File('render.png'))

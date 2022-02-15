@@ -13,28 +13,25 @@ class Vec3:
     z=0
     
     def construct(self,inlst):
-        ret = Vec3(inlst)
-        return ret
+        return Vec3(inlst)
     def __init__(self,inlst):
         self.x = inlst[0]
         self.y = inlst[1]
         self.z = inlst[2]
     def to_string(self):
-        return str(self.x)+" "+str(self.y)+" "+str(self.z)
+        return f'{str(self.x)} {str(self.y)} {str(self.z)}'
     def scale(self,scale):
         a = self.x * scale
         b = self.y * scale
         c = self.z * scale
-        ret = Vec3((a,b,c))
-        return ret
+        return Vec3((a,b,c))
     def rx(self,ang):
         x = self.x
         y = self.y
         z = self.z
         y1 = (y*math.cos(ang))-(z*math.sin(ang))
         z1 = (y*math.sin(ang))+(z*math.cos(ang))
-        ret = Vec3((x, y1,z1))
-        return ret
+        return Vec3((x, y1,z1))
 
     def ry(self,ang):
         x = float(self.x) * 1
@@ -42,16 +39,14 @@ class Vec3:
         z = float(self.z) * 1
         x1 = (x*math.cos(ang))-(z*math.sin(ang))
         z1 = (x*math.sin(ang))+(z*math.cos(ang))
-        ret = Vec3((x1,y,z1))
-        return ret
+        return Vec3((x1,y,z1))
     def rz(self,ang):
         x = self.x
         y = self.y
         z = self.z
         x1 = (x*math.cos(ang))-(y*math.sin(ang))
         y1 = (x*math.sin(ang))+(y*math.cos(ang))
-        ret = Vec3((x1,y1,z))
-        return ret
+        return Vec3((x1,y1,z))
     def to_3D(self,w):
         self.x = self.x / w
         self.y = self.y / w
@@ -63,10 +58,7 @@ class Vec3:
         self.y = self.y/self.z
         #print(str(self.x)+" : "+str(self.y))
         #os.system("pause")
-        if(_type):
-            return self
-        else:
-            return Vec2(self.x,self.y)
+        return self if _type else Vec2(self.x,self.y)
     
     def cross(self,line):
       b= line
@@ -138,7 +130,10 @@ class tri:
             self.normal_lighting = Vec3((normalized_L.dot(self.n1)*255,normalized_L.dot(self.n2)*255,normalized_L.dot(self.n3)*255))
             #self.normal_lighting = [normalized_L.dot(self.n1),normalized_L.dot(self.n2),normalized_L.dot(self.n3)]
     def to_string(self):
-        return self.p1.to_string()+" / "+self.p2.to_string()+" / "+self.p3.to_string()
+        return (
+            f'{self.p1.to_string()} / {self.p2.to_string()} / '
+            + self.p3.to_string()
+        )
     def area(self):
         a= self.p1
         b = self.p2
@@ -197,27 +192,14 @@ class tri:
         x3 = int(self.p3.x)
         y3 = int(self.p3.y)
         if (y2 < y1):
-          tmp = y1
-          y1= y2
-          y2 = tmp
-          tmp = x1
-          x1= x2
-          x2 = tmp
+            y1, y2 = y2, y1
+            x1, x2 = x2, x1
         if (y3 < y1):
-          tmp = y1
-          y1= y3
-          y3 = tmp
-          tmp = x1
-          x1= x3
-          x3 = tmp
+            y1, y3 = y3, y1
+            x1, x3 = x3, x1
         if (y3 < y2):
-            tmp = y2
-            y2= y3
-            y3 = tmp
-            tmp = x2
-            x2= x3
-            x3 = tmp
-      
+            y2, y3 = y3, y2
+            x2, x3 = x3, x2
         dy1 = y2 - y1
         dx1 = x2 - x1
 
@@ -229,14 +211,12 @@ class tri:
           dax_step = dx1 / abs(dy1)
         if (dy2):
            dbx_step = dx2 / abs(dy2)
-        if (dy1):
+        if dy1:
             for i in range(int(y1),int(y2+1)):
                 ax = x1 + int(float(i - y1) * float(dax_step))
                 bx = x1 + int(float(i - y1) * float(dbx_step))
                 if (ax > bx):
-                    tmp = ax
-                    ax = bx
-                    bx = tmp
+                    ax, bx = bx, ax
                 for j in range(int(ax),int(bx)):
                     color1 = self.Shade_p(Vec3((j,i,0)),shader,color)
                     drawer.point((j,i),fill=color1)
@@ -248,14 +228,12 @@ class tri:
             dax_step = dx1 / abs(dy1);
         if (dy2):
             dbx_step = dx2 / abs(dy2);
-        if (dy1):
+        if dy1:
             for i in range(int(y2),int(y3+1)):
                 ax = x2 + int(float(i - y2) * float(dax_step))
                 bx = x1 + int(float(i - y1) * float(dbx_step))
                 if (ax > bx):
-                    tmp = ax
-                    ax = bx
-                    bx = tmp
+                    ax, bx = bx, ax
                 for j in range(int(ax),int(bx)):
                     color1 = self.Shade_p(Vec3((j,i,0)),shader,color)
                     drawer.point((j,i),fill=color1)

@@ -36,28 +36,40 @@ class Render3D:
                     line = line.split(" ")
                     tmp = _3D_t.Vec3((float(line[0]),float(line[1]),float(line[2])))
                     for tmp1 in vertex:
-                        if(tmp.x==tmp1.x and tmp.y==tmp1.y and tmp.z ==tmp1.z):
-                            print(tmp.to_string()+" L: "+str(len(vertex)))
+                        if (tmp.x==tmp1.x and tmp.y==tmp1.y and tmp.z ==tmp1.z):
+                            print(f'{tmp.to_string()} L: {len(vertex)}')
                     vertex.append(tmp)
-                else:
-                    if line.startswith("vn "):
-                      line = line.replace("vn ","").split(" ")
-                      normals.append(_3D_t.Vec3((float(line[0]),float(line[1]),float(line[2]))))
-                    else:
-                      if line.startswith("f "):
-                          line = line.replace("f ","")
-                          line = line.split(" ")
-                          points = []
-                          vni = []
-                          points.append(vertex[int(line[0].split("/")[0])-1])
-                          points.append(vertex[int(line[1].split("/")[0])-1])
-                          points.append(vertex[int(line[2].split("/")[0])-1])
-                          vni.append(normals[int(line[0].split("/")[2])-1])
-                          vni.append(normals[int(line[1].split("/")[2])-1])
-                          vni.append(normals[int(line[2].split("/")[2])-1])
-                          mesh.append(_3D_t.tri(points,vni))
-        
-        self.objs.append({"name":file_path.replace(path+"","").replace(".obj",""),"obj":mesh,"color":color})
+                elif line.startswith("vn "):
+                    line = line.replace("vn ","").split(" ")
+                    normals.append(_3D_t.Vec3((float(line[0]),float(line[1]),float(line[2]))))
+                elif line.startswith("f "):
+                    line = line.replace("f ","")
+                    line = line.split(" ")
+                    points = list(
+                        (
+                            vertex[int(line[0].split("/")[0]) - 1],
+                            vertex[int(line[1].split("/")[0]) - 1],
+                            vertex[int(line[2].split("/")[0]) - 1],
+                        )
+                    )
+
+                    vni = list(
+                        (
+                            normals[int(line[0].split("/")[2]) - 1],
+                            normals[int(line[1].split("/")[2]) - 1],
+                            normals[int(line[2].split("/")[2]) - 1],
+                        )
+                    )
+
+                    mesh.append(_3D_t.tri(points,vni))
+
+        self.objs.append(
+            {
+                "name": file_path.replace(f'{path}', "").replace(".obj", ""),
+                "obj": mesh,
+                "color": color,
+            }
+        )
     def translate(self, _point):
         point = _point
         point=point.scale(1)
@@ -75,87 +87,87 @@ class Render3D:
       #return (byte * shading)*255
     def sproject(self,wire):
         for obj in self.objs:
-          if(obj["name"]=="Eyes"):
-            drawer = ImageDraw.Draw(self.image)
-            img = Image.open(path+"m.png").convert("RGBA")
-            x,y = img.size
-            for _x in range(x):
-              for _y in range(y):
-                color = img.getpixel((_x,_y))
-                if(color[3]==255):
-                  drawer.point((_x+270,_y+245),fill=color)
-                  drawer.point(((x-_x)+205,_y+245),fill=color)          
-          for _tri in obj["obj"]:
-              points = [self.translate(_tri.p1),self.translate(_tri.p2),self.translate(_tri.p3)]
-              _points=[]
-              line1 = points[1].sub(points[0])
-              line2 = points[2].sub(points[0])
-              normal = line1.cross(line2)
-              _pos = _3D_t.Vec3(self.pos)
-              trans_location = _pos.add(points[0])
-              normal  = normal.div_f(normal.len())
-              normal_dot =normal.dot(trans_location) #normal.rayCast(trans_location)
-              if(normal_dot < 0):
-                #shading = (self.light.rayCast(normal))*(255)
-                #shading = self.light.div_f(self.light.len()).dot(normal)*255
-                for _p in points:
-                  p = _p
-                  z =  p.z
-                  newp = _3D_t.Vec3((p.x*self.f,p.y*self.f,((z*self.q)-(self.zn*self.q))))
-                  newp.to_3D(z)
-                  newp = newp.to_2D(1)
-                  newp.x = newp.x + 250
-                  newp.y = newp.y + 250
-                  _points.append(newp)
-                toBeRasturized = _3D_t.tri(_points,(_tri.n1,_tri.n2,_tri.n3))
-                color = _3D_t.Vec3((obj["color"]))
-                toBeRasturized.FillShadeTru(self.drawer,color,self.shaders)
-                if(wire):
-                    new_points = [(_points[0].x,_points[0].y),(_points[1].x,_points[1].y),(_points[2].x,_points[2].y)]
-                    self.drawer.polygon(new_points, outline=(0,0,0,255))
+            if (obj["name"]=="Eyes"):
+                drawer = ImageDraw.Draw(self.image)
+                img = Image.open(f'{path}m.png').convert("RGBA")
+                x,y = img.size
+                for _x in range(x):
+                  for _y in range(y):
+                    color = img.getpixel((_x,_y))
+                    if(color[3]==255):
+                      drawer.point((_x+270,_y+245),fill=color)
+                      drawer.point(((x-_x)+205,_y+245),fill=color)
+            for _tri in obj["obj"]:
+                points = [self.translate(_tri.p1),self.translate(_tri.p2),self.translate(_tri.p3)]
+                line1 = points[1].sub(points[0])
+                line2 = points[2].sub(points[0])
+                normal = line1.cross(line2)
+                _pos = _3D_t.Vec3(self.pos)
+                trans_location = _pos.add(points[0])
+                normal  = normal.div_f(normal.len())
+                normal_dot =normal.dot(trans_location) #normal.rayCast(trans_location)
+                if (normal_dot < 0):
+                    _points=[]
+                    #shading = (self.light.rayCast(normal))*(255)
+                    #shading = self.light.div_f(self.light.len()).dot(normal)*255
+                    for _p in points:
+                      p = _p
+                      z =  p.z
+                      newp = _3D_t.Vec3((p.x*self.f,p.y*self.f,((z*self.q)-(self.zn*self.q))))
+                      newp.to_3D(z)
+                      newp = newp.to_2D(1)
+                      newp.x = newp.x + 250
+                      newp.y = newp.y + 250
+                      _points.append(newp)
+                    toBeRasturized = _3D_t.tri(_points,(_tri.n1,_tri.n2,_tri.n3))
+                    color = _3D_t.Vec3((obj["color"]))
+                    toBeRasturized.FillShadeTru(self.drawer,color,self.shaders)
+                    if(wire):
+                        new_points = [(_points[0].x,_points[0].y),(_points[1].x,_points[1].y),(_points[2].x,_points[2].y)]
+                        self.drawer.polygon(new_points, outline=(0,0,0,255))
                 
     def project(self,wire):
         for obj in self.objs:
-          if(obj["name"]=="Face"):
-            drawer = ImageDraw.Draw(self.image)
-            img = Image.open(path+"m.png").convert("RGBA")
-            x,y = img.size
-            for _x in range(x):
-              for _y in range(y):
-                color = img.getpixel((_x,_y))
-                if(color[3]==255):
-                  drawer.point((_x+270,_y+245),fill=color)
-                  drawer.point(((x-_x)+205,_y+245),fill=color)          
-          for _tri in obj["obj"]:
-              points = [self.translate(_tri.p1),self.translate(_tri.p2),self.translate(_tri.p3)]
-              _points=[]
-              line1 = points[1].sub(points[0])
-              line2 = points[2].sub(points[0])
-              normal = line1.cross(line2)
-              _pos = _3D_t.Vec3(self.pos)
-              trans_location = _pos.add(points[0])
-              normal  = normal.div_f(normal.len())
-              normal_dot =normal.dot(trans_location) #normal.rayCast(trans_location)
-              if(normal_dot < 0):
-                #shading = (self.light.rayCast(normal))*(255)
-                shading = self.light.div_f(self.light.len()).dot(normal)*255
-                for _p in points:
-                  p = _p
-                  z =  p.z
-                  newp = _3D_t.Vec3((p.x*self.f,p.y*self.f,((z*self.q)-(self.zn*self.q))))
-                  newp.to_3D(z)
-                  newp = newp.to_2D()
-                  newp.x = newp.x + 250
-                  newp.y = newp.y + 250
-                  _points.append(newp.to_tu())
-                color = _3D_t.Vec3((obj["color"]))
-                color.x=self.shade_8bit(color.x, shading)
-                color.y=self.shade_8bit(color.y, shading)
-                color.z=self.shade_8bit(color.z, shading)
-                color = (int(color.x), int(color.y), int(color.z))
-                self.drawer.polygon(_points, fill = color)
-                if(wire):
-                  self.drawer.polygon(_points, outline=(255,255,255,10))
+            if (obj["name"]=="Face"):
+                drawer = ImageDraw.Draw(self.image)
+                img = Image.open(f'{path}m.png').convert("RGBA")
+                x,y = img.size
+                for _x in range(x):
+                  for _y in range(y):
+                    color = img.getpixel((_x,_y))
+                    if(color[3]==255):
+                      drawer.point((_x+270,_y+245),fill=color)
+                      drawer.point(((x-_x)+205,_y+245),fill=color)
+            for _tri in obj["obj"]:
+                points = [self.translate(_tri.p1),self.translate(_tri.p2),self.translate(_tri.p3)]
+                _points=[]
+                line1 = points[1].sub(points[0])
+                line2 = points[2].sub(points[0])
+                normal = line1.cross(line2)
+                _pos = _3D_t.Vec3(self.pos)
+                trans_location = _pos.add(points[0])
+                normal  = normal.div_f(normal.len())
+                normal_dot =normal.dot(trans_location) #normal.rayCast(trans_location)
+                if(normal_dot < 0):
+                  #shading = (self.light.rayCast(normal))*(255)
+                  shading = self.light.div_f(self.light.len()).dot(normal)*255
+                  for _p in points:
+                    p = _p
+                    z =  p.z
+                    newp = _3D_t.Vec3((p.x*self.f,p.y*self.f,((z*self.q)-(self.zn*self.q))))
+                    newp.to_3D(z)
+                    newp = newp.to_2D()
+                    newp.x = newp.x + 250
+                    newp.y = newp.y + 250
+                    _points.append(newp.to_tu())
+                  color = _3D_t.Vec3((obj["color"]))
+                  color.x=self.shade_8bit(color.x, shading)
+                  color.y=self.shade_8bit(color.y, shading)
+                  color.z=self.shade_8bit(color.z, shading)
+                  color = (int(color.x), int(color.y), int(color.z))
+                  self.drawer.polygon(_points, fill = color)
+                  if(wire):
+                    self.drawer.polygon(_points, outline=(255,255,255,10))
 class mario:
     key = [{"name":"hat","adr":["38"]},{"name":"hair","adr":["98","9C","A0","A4"]},{"name":"head","adr":["80","84","88","8C"]},{"name":"arms_chest","adr":["3C","40","44"]},{"name":"overalls","adr":["20","24","28","2C"]},{"name":"gloves","adr":["50","54","58","5C"]},{"name":"shoes","adr":["68","6C","70","74"]}]
     engine = Render3D()

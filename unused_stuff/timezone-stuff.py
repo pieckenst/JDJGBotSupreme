@@ -3,13 +3,23 @@ import datetime
 from os import system, name
 
 def clear(): 
-  # for windows 
-  if name == 'nt': 
-      _ = system('cls') 
+  # for windows
+  _ = system('cls') if name == 'nt' else system('clear') 
 
-  # for mac and linux(here, os.name is 'posix') 
-  else: 
-      _ = system('clear') 
+y = 0
+
+people = [
+  "RenDev:",
+  "Nicks:",
+  "JDJG:",
+  "The Hook:",
+  "Redstone Wiz:",
+  "Crimson:",
+  "Shadi:",
+  "Salimi:",
+  "Rodimus:",
+  "Nightcore:",
+]
 
 while True:
   time_database99 = [
@@ -29,29 +39,14 @@ while True:
 
   x = 0
 
-  y = 0
-
-  people = [
-    "RenDev:",
-    "Nicks:",
-    "JDJG:",
-    "The Hook:",
-    "Redstone Wiz:",
-    "Crimson:",
-    "Shadi:",
-    "Salimi:",
-    "Rodimus:",
-    "Nightcore:",
-  ]
-
   for x in range(len(time_database99)):
     #len tells the len of the object time_database99
     time_here=(datetime.datetime.now(pytz.timezone(time_database99[x])).strftime("%m/%d/%Y %H:%M:%S"))
     #the [x] is there to tell which part of the list to use.
     #format command.
     person_name = people[x]
-    print(person_name+" "+time_here)
-    x = x + 1
+    print(f'{person_name} {time_here}')
+    x += 1
 
   print("\n Hit Enter to Update Times")
   input("\n Press any key to continue . . .")

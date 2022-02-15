@@ -41,27 +41,14 @@ class transFace:
     x3 = self.v.p3.x
     y3 = self.v.p3.y
     if (y2 < y1):
-      tmp = y1
-      y1= y2
-      y2 = tmp
-      tmp = x1
-      x1= x2
-      x2 = tmp
+      y1, y2 = y2, y1
+      x1, x2 = x2, x1
     if (y3 < y1):
-      tmp = y1
-      y1= y3
-      y3 = tmp
-      tmp = x1
-      x1= x3
-      x3 = tmp
+      y1, y3 = y3, y1
+      x1, x3 = x3, x1
     if (y3 < y2):
-      tmp = y2
-      y2= y3
-      y3 = tmp
-      tmp = x2
-      x2= x3
-      x3 = tmp
-      
+      y2, y3 = y3, y2
+      x2, x3 = x3, x2
     dy1 = y2 - y1
     dx1 = x2 - x1
 
@@ -73,15 +60,13 @@ class transFace:
       dax_step = dx1 / abs(dy1)
     if (dy2):
        dbx_step = dx2 / abs(dy2)
-    if (dy1):
+    if dy1:
       i=y1
       for i in range(y1,y2):
         ax = x1 + (i - y1) * dax_step
         bx = x1 + (i - y1) * dbx_step
         if (ax > bx):
-          tmp = ax
-          ax = bx
-          bx = tmp
+          ax, bx = bx, ax
 
         #for j in range(ax,bx):
 					#Draw(j, i)

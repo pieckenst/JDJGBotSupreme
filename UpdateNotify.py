@@ -12,14 +12,6 @@ def GetArgs(message):
   tmpmsg = tmpmsg.replace("[body_head] ","")
   tmpmsg = tmpmsg.replace("[body] ","")
   return tmpmsg
-  i = -1
-  for arg in message.content.split(" "):
-    i=i+1
-    if i > 0:
-      args = args + str(arg)
-      if i+1 != len(message.content.split(" ")):
-        args=args+" "
-  return args
 async def UpdateNote(message,client):
   mode = "NULL"
   banana=0

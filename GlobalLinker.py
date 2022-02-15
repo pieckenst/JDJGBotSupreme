@@ -25,7 +25,7 @@ def AddGlobalLink(client,message):
 def FilterMessage(message):
   tmp_msg = str(message.content)
   for men in message.mentions:
-    tmp_msg = tmp_msg.replace(str("<@!"+str(men.id)+">"),men.name)
+    tmp_msg = tmp_msg.replace(str(f'<@!{str(men.id)}>'), men.name)
 
   message=censor_text(message)
   #this should now censor all the text right RenDev?
@@ -64,12 +64,12 @@ async def SendMessage(message):
 
 async def TestGLink(message):
   embedVar = discord.Embed(title=f"{message.guild}", color = 15428885, timestamp = message.created_at, )
-  embedVar.set_author(name=str(message.author),icon_url=message.author.display_avatar.url)            
+  embedVar.set_author(name=str(message.author),icon_url=message.author.display_avatar.url)
   embedVar.set_thumbnail(url = GetPfp.GetServerPfp(message))
   val = str(FilterMessage(message))
   images = message.attachments
   for obj in images:
-    val=val + (""+obj.url)
+    val += f'{obj.url}'
   embedVar.add_field(name=str(message.author),value=val,inline=True)
   await message.channel.send(embed = embedVar)
 def TerminateLink(message):
@@ -84,28 +84,28 @@ async def FindGlobal(message):
   for chan in docs:
     try:
       channel = ClientConfig.client.get_channel(int(chan["chan_id"]))
-      if(message.channel.id!=channel.id):
+      if (message.channel.id!=channel.id):
         #print("SEARCHING")
         messages = await channel.history(limit=100).flatten()
         for msg in messages:
           if msg.author.bot:
             embedVar = msg.embeds[0]
             fields = embedVar.fields
-            if (fields[0].name == str(message.author)):
-              if(fields[0].value==str(message.content)):
-                ret.append({"mes_id":msg,"chan_id":channel.id})
+            if (fields[0].name == str(
+                message.author)) and (fields[0].value == str(message.content)):
+              ret.append({"mes_id":msg,"chan_id":channel.id})
     except:
       banana = 1
   return ret
 
 def GetGlobalEmbed(message):
   embedVar = discord.Embed(title=f"{message.guild}", color = 15428885, timestamp = message.created_at)
-  embedVar.set_author(name=str(message.author),icon_url=message.author.display_avatar.url)            
+  embedVar.set_author(name=str(message.author),icon_url=message.author.display_avatar.url)
   embedVar.set_thumbnail(url = GetPfp.GetServerPfp(message))
   val = str(FilterMessage(message))
   images = message.attachments
   for obj in images:
-    val=val + ("\n"+obj.url)
+    val += "\n"+obj.url
   embedVar.add_field(name=str(message.author),value=val,inline=True)
   return embedVar
 
@@ -113,8 +113,7 @@ def GetGlobalEmbed(message):
 
 async def display_guilds_id(message):
   for gChan in DatabaseConfig.db.g_link_testing.find():
-    string = ""
-    string = string + str(client.get_channel(int(gChan["chan_id"])).name)
+    string = "" + str(client.get_channel(int(gChan["chan_id"])).name)
     await message.channel.send(string)
 
 
@@ -126,7 +125,7 @@ async def extend(message):
     return
   if(message.channel.id == 782123846781370368):
     return
-  if(message.channel.id != 782123846781370368 and not message.author.bot):
+  if not message.author.bot:
     gChan = DatabaseConfig.db.g_link_testing.find_one({"ser_id":message.guild.id})
     try:
       gChan["chan_id"]
@@ -135,47 +134,15 @@ async def extend(message):
     if(gChan["chan_id"]==message.channel.id):
       await client.get_channel(782123846781370368).send(embed = GetGlobalEmbed(message))
     return
-    print("ERROR IN EXTENDER: JDJGBOT")
 
 
 async def respond(message):
   return
-  if(ClientConfig.whoami==0):
-    return
-  try:
-    if(message.guild.id != 736422329399246990):
-      return
-  except:
-    return
-  if(ClientConfig.whoami==message.author.id):
-    return
-  print("WHOAMI: "+ str(ClientConfig.whoami) +" : "+str(message.author.id))
-  #return
-  if(message.author.bot):
-    print("********************************************")
-    print("BOT NAME: " + str(message.author.name))
-    print("GUILD NAME: " + str(message.guild.name))
-    print("CHANNEL NAME: " + str(message.channel.name))
-  if message.author.bot:
-    if(ClientConfig.whoami!=message.author.id):
-      if(message.channel.id == 782123846781370368):
-        for gChan in DatabaseConfig.db.g_link_testing.find():
-          if message.guild.id != gChan['ser_id']:
-            try:
-              await client.get_channel(gChan['chan_id']).send(embed=message.embeds[0])
-            except:
-              print("ERROR: NO ACCESS TO CHANNEL: "+str(gChan['ser_id']) + " : "+str(gChan['chan_id'])+"\nCONTANCT RENDEV OR DELETE THIS SERVER FROM DATABASE")
-         # except:
-        #      print("ERROR IN RESPONDER: SHADIBOT")
-        #      print(gChan['chan_id'])
-        #      banana = 1;
-      else:
-        banana =0
         #print("chanID: "+str(message.channel.id) + str(message.author) + str())
   
 
 def isGlobalChannel(channel_id):
   doc = DatabaseConfig.db.g_link_testing.find_one({"chan_id":channel_id})
-  if(doc == None):
+  if doc is None:
     return False
   return True
