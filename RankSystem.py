@@ -63,13 +63,11 @@ def GetRank(user,server="all"):
     if server=="all":
       ret.append(int(doc['exp']))
     else:
-      for users in server.members:
-       if doc['user_id']==users.id:
-          ret.append(int(doc['exp']))
+      ret.extend(
+          int(doc['exp']) for users in server.members
+          if doc['user_id'] == users.id)
   ret.sort(reverse=True)
-  i=0
-  for xp in ret:
-    i=i+1
+  for i, xp in enumerate(ret, start=1):
     if xp==int(user_dat['exp']):
       return i
 
@@ -84,19 +82,21 @@ async def GetTop10(client,message):
     except:
       args="local"
   if args=="global":
-    for doc in DatabaseConfig.db.users_testing.find():
-      ret.append(doc['exp'])
+    ret.extend(doc['exp'] for doc in DatabaseConfig.db.users_testing.find())
     ret.sort(reverse=True)
     embedVar = discord.Embed(title="Top 10 Leaderboard [Global]")
     for xp in ret:
-      i=i+1
+      i += 1
       if i<10:
         try:
           doc = DatabaseConfig.db.users_testing.find_one({"exp":xp})
-          embedVar.add_field(name="#"+str(i+1)+". "+str(client.get_user(doc['user_id'])),value=str(doc['exp']),inline = True)
+          embedVar.add_field(
+              name=f'#{str(i+1)}. ' + str(client.get_user(doc['user_id'])),
+              value=str(doc['exp']),
+              inline=True,
+          )
         except:
           banana=0
-    await message.channel.send(embed=embedVar)
   else:
     embedVar = discord.Embed(title="Top 10 Leaderboard [Local]")
     for users in message.guild.members:
@@ -107,11 +107,16 @@ async def GetTop10(client,message):
     ret.sort(reverse=True)
     #embedVar = discord.Embed(title=)
     for xp in ret:
-      i=i+1
+      i += 1
       if i<10:
         doc = DatabaseConfig.db.users_testing.find_one({"exp":xp})
-        embedVar.add_field(name="#"+str(i+1)+". "+str(client.get_user(doc['user_id'])),value=str(doc['exp']),inline = True)
-    await message.channel.send(embed=embedVar) 
+        embedVar.add_field(
+            name=f'#{str(i+1)}. ' + str(client.get_user(doc['user_id'])),
+            value=str(doc['exp']),
+            inline=True,
+        ) 
+
+  await message.channel.send(embed=embedVar) 
         
         
 
@@ -130,16 +135,13 @@ async def GetStatus(_message,_user="NULL"):
     message  = fakeMessage(_user,_message.guild,_message.channel)
   else:
     message = _message
-  if(_user == "NULL"):
-    user = message.author
-  else:
-    user = _user
+  user = message.author if (_user == "NULL") else _user
   if CheckIfExisting(user)==1:
     doc = DatabaseConfig.db.users_testing.find_one({"user_id":user.id})
     level= int(doc['level'])
     exp = int(doc['exp'])
     next_level_exp = GetNextLevelUp(level)
-    embedVar = discord.Embed(title="Rank of "+str(user))
+    embedVar = discord.Embed(title=f'Rank of {str(user)}')
     embedVar.add_field(name="Global Rank   ",value=str(GetRank(message.author)))
     embedVar.add_field(name="Server Rank",value =str(GetRank(message.author,message.guild)),inline=True)
     embedVar.add_field(name="Level" ,value=str(doc['level']))
@@ -149,17 +151,16 @@ async def GetStatus(_message,_user="NULL"):
 
 def GetUserByName(client,message):
   args = ""
-  i = -1
-  for arg in message.content.split(" "):
-    i=i+1
+  for i, arg in enumerate(message.content.split(" ")):
     if i > 0:
-      args = args + str(arg)
+      args += str(arg)
       if i+1 != len(message.content.split(" ")):
-        args=args+" "
-  for user in client.get_all_members():
-    if str(user.name).startswith(args):
-      return user.id
-  return 1232123
+        args += " "
+  return next(
+      (user.id for user in client.get_all_members()
+       if str(user.name).startswith(args)),
+      1232123,
+  )
 
 async def DevGetStatus(client,message):
   doc = ""
@@ -169,7 +170,7 @@ async def DevGetStatus(client,message):
     level= int(doc['level'])
     exp = int(doc['exp'])
     next_level_exp = GetNextLevelUp(level)
-    embedVar = discord.Embed(title="Rank of "+str(user))
+    embedVar = discord.Embed(title=f'Rank of {str(user)}')
     embedVar.add_field(name="Global Rank",value=str(GetRank(user)))
     embedVar.add_field(name="Server Rank",value =str(GetRank(user,message.guild)),inline=True)
     embedVar.add_field(name="Level" ,value=str(doc['level']))

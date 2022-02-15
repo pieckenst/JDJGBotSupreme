@@ -30,16 +30,11 @@ class Pixman:
             if obj["name"] == region_name:
                 return obj
     def set_region(self, region_name,color):
-        i=-1
-        for obj in self.reg:
-            i = i + 1
+        for i, obj in enumerate(self.reg):
             if obj["name"] == region_name:
                 self.reg[i]["color"] = color
     def find_region(self,region_name):
-        for obj in self.reg:
-            if (obj["name"]==region_name):
-                return 1
-        return 0
+        return next((1 for obj in self.reg if (obj["name"]==region_name)), 0)
     def render(self):
         for obj in self.reg:
             for pixel in obj["pix"]:
@@ -88,9 +83,9 @@ class ram:
             color_code_front2 = colored_bit2[0].replace("8107EC","")
             color_section = colored_bit[1]
             color_section2 = colored_bit2[1]
-            r = int(color_section[0:2], 16)
+            r = int(color_section[:2], 16)
             g = int(color_section[2:4], 16)
-            b = int(color_section2[0:2], 16)
+            b = int(color_section2[:2], 16)
             color_code.append({"adr":[color_code_front,color_code_front2],"rgb":{"r":r,"g":g,"b":b}})
             x+=2
         return color_code
@@ -103,4 +98,4 @@ class ram:
             
             
 def convertTuple(tup):
-    return str(tup[0])+", "+str(tup[1])+", "+str(tup[2])
+    return f'{str(tup[0])}, {str(tup[1])}, {str(tup[2])}'

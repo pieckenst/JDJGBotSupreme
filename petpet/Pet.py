@@ -39,23 +39,21 @@ class aniRen:
 def overlay_image(img, img1):
     image = Image.new("RGBA", (img.width, img.height), (0,0,0,0))
     drawer = ImageDraw.Draw(image)
-    offy=0
-    if(img1.height != img.height):
-        offy = 112-img1.height
+    offy = 112-img1.height if (img1.height != img.height) else 0
     offx = int((112-img1.width)/2)
     for x in range(img.width):
         for y in range(img.height):
             drawer.point((x,y+(0.4*112)),img.getpixel((x,y)))
             try:
-                if img.getpixel((x,y))[3] ==0:
-                    #drawer.point((x,y),(0,0,0,0))
-                    if(y-offy>=0):
-                   # print(y-offy)
-                       if(x-offx>=0):
-                          drawer.point((x,y),img1.getpixel((x-offx,y-offy)))
+                if (
+                    img.getpixel((x, y))[3] == 0
+                    and (y - offy >= 0)
+                    and (x - offx >= 0)
+                ):
+                    drawer.point((x,y),img1.getpixel((x-offx,y-offy)))
             except:
               banana=1
-            
+
     return image
 def alpha_composite(img1, img2,offset):
     #img1 = img1.convert("RGBA")
@@ -89,7 +87,7 @@ def new_paste(img,img1,):
   
 
 def print_pix(pix):
-    print("R: "+str(pix[0])+" G: "+str(pix[1])+" B: "+str(pix[2])+" A: "+str(pix[3]))
+    print(f'R: {str(pix[0])} G: {str(pix[1])} B: {str(pix[2])} A: {str(pix[3])}')
 
 
 def floor(num):
@@ -107,39 +105,38 @@ from io import BytesIO
 #response = requests.get(url)
 #img = Image.open(BytesIO(response.content))
 async def get_pet(message,channel):
-  if message.attachments:
-    _img = message.attachments[0]
-  if not message.attachments:
-    _img = message.author.avatar_url
-  byteBufferThing = await  _img.read()
-  f = open("./petpet/tmp.png", "wb")
-  f.write(byteBufferThing)
-  f.close()
-  print(len(byteBufferThing))
-  #tex = Image.frombytes('RGBA', (_img.width,_img.height),byteBufferThing, 'png')
-  tex = Image.open("./petpet/tmp.png")
-  max_squ = 0.6
-  min_squ = 0.4
-  squ = min_squ
-  squ_s = 0.09
-  fps = 240
-  jhon_spd = int(1000/fps) 
-  tot = int((max_squ-min_squ)/squ_s)*20
-  for r1 in range(tot):
-      squ = squ + squ_s
-      if squ > max_squ:
-          squ = max_squ
-          squ_s = squ_s*-1
-      if squ < min_squ:
-          squ=min_squ
-          squ_s=squ_s*-1
-      squx =((max_squ-squ +min_squ)*0.5)+0.6
-      under =scale_img(tex,int(squx*112),int(squ*112))
-      #under = add_rows(under, under.width, 112)
-      #frame = overlay_image(hand.advance(),under)
-      frame = new_paste(hand.advance(), under)
-      frames.append(frame)
-  with BytesIO() as image_binary:
-    frames[0].save(image_binary, 'GIF',disposal=2, transparency = -1,save_all=True, append_images=frames[1:(tot-1)], optimize=False, duration=16,loop=0)
-    image_binary.seek(0)
-    await channel.send(file=discord.File(filename="out.gif",fp=image_binary))
+    if message.attachments:
+      _img = message.attachments[0]
+    if not message.attachments:
+      _img = message.author.avatar_url
+    byteBufferThing = await  _img.read()
+    with open("./petpet/tmp.png", "wb") as f:
+        f.write(byteBufferThing)
+    print(len(byteBufferThing))
+    #tex = Image.frombytes('RGBA', (_img.width,_img.height),byteBufferThing, 'png')
+    tex = Image.open("./petpet/tmp.png")
+    max_squ = 0.6
+    min_squ = 0.4
+    squ = min_squ
+    squ_s = 0.09
+    fps = 240
+    jhon_spd = 1000 // fps
+    tot = int((max_squ-min_squ)/squ_s)*20
+    for _ in range(tot):
+        squ += squ_s
+        if squ > max_squ:
+            squ = max_squ
+            squ_s *= -1
+        if squ < min_squ:
+            squ=min_squ
+            squ_s *= -1
+        squx =((max_squ-squ +min_squ)*0.5)+0.6
+        under =scale_img(tex,int(squx*112),int(squ*112))
+        #under = add_rows(under, under.width, 112)
+        #frame = overlay_image(hand.advance(),under)
+        frame = new_paste(hand.advance(), under)
+        frames.append(frame)
+    with BytesIO() as image_binary:
+      frames[0].save(image_binary, 'GIF',disposal=2, transparency = -1,save_all=True, append_images=frames[1:(tot-1)], optimize=False, duration=16,loop=0)
+      image_binary.seek(0)
+      await channel.send(file=discord.File(filename="out.gif",fp=image_binary))

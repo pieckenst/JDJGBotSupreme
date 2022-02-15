@@ -105,7 +105,7 @@ class UserCodes:
       for type_alias in data_type.aliases:
         if(type_alias.lower() == alias.lower()):
           return data_type.good_name
-    raise Exception("Linker: Reference not defined :" + str(alias))
+    raise Exception(f'Linker: Reference not defined :{str(alias)}')
 
   #This function will take int the raw code type that the
   #user might have not typed correctly and links it to the
@@ -126,7 +126,7 @@ class UserCodes:
   #two feilds are required
   def getCode(self, code = "NULL", title = "NULL"):
     mode = -1
-    
+
     if(code == "NULL"):
       mode = 0
 
@@ -138,10 +138,10 @@ class UserCodes:
 
     for i1 in range(len(self.reg_codes)): #gets the list of datatypes
       for i in range(len(self.reg_codes[i1])): #iterates through the elemetnts in that data type
-        if(mode == 0):
+        if mode == 0:
           if(int(self.reg_codes[i1][i]["code"]) == int(code)):
             return self.reg_codes[i1][i]
-        if(mode == 1):
+        elif mode == 1:
           if(int(self.reg_codes[i1][i]["title"]) == int(title)):
             return self.reg_codes[i1][i]
     return False #default return
@@ -153,7 +153,7 @@ class UserCodes:
   #two feilds are required
   def deleteCode(self, code = "NULL", title = "NULL"):
     mode = -1
-    
+
     if(code == "NULL"):
       mode = 0
 
@@ -165,11 +165,11 @@ class UserCodes:
 
     for i1 in range(len(self.reg_codes)): #gets the list of datatypes
       for i in range(len(self.reg_codes[i1])): #iterates through the elemetnts in that data type
-        if(mode == 0):
+        if mode == 0:
           if(int(self.reg_codes[i1][i]["code"]) == int(code)):
             self.reg_codes[i1].pop(i)
             return True
-        if(mode == 1):
+        elif mode == 1:
           if(int(self.reg_codes[i1][i]["title"]) == int(title)):
             self.reg_codes[i1].pop(i)
             return True
@@ -180,17 +180,13 @@ class UserCodes:
   #return it as a string array
   def getCodeList(self):
     #use three spaces for a tab
-    ret = []
-    ret.append("Friend Code Types: ")
-    for _type in self.code_types:
-      ret.append("   "+ str(_type.good_name))
-    ret.append(" ")
-    ret.append("Game Code Types: ")
+    ret = ['Friend Code Types: ']
+    ret.extend(f'   {str(_type.good_name)}' for _type in self.code_types)
+    ret.extend((" ", "Game Code Types: "))
     for d_type in self.data_code_types:
-      ret.append("   " + d_type.good_name)
-      ret.append("   " + d_type.good_name + "'s Ailases:")
-      for alias in d_type.aliases:
-        ret.append("   "+ "   " + alias)
+      ret.extend((f'   {d_type.good_name}',
+                  f'   {d_type.good_name}' + "'s Ailases:"))
+      ret.extend("   "+ "   " + alias for alias in d_type.aliases)
       ret.append(" ")
     return ret
 
@@ -201,8 +197,7 @@ class UserCodes:
     ret = []
     for gerne in self.reg_codes:
       ret.append(gerne.good_name)
-      for doc in gerne:
-        ret.append("   " + doc.title + " = " + doc.code)
+      ret.extend(f'   {doc.title} = {doc.code}' for doc in gerne)
     return ret
   
   #class destructor

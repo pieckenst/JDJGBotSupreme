@@ -2,10 +2,7 @@ import DatabaseConfig
 import discord
 col = DatabaseConfig.db.server_settings
 def toggle_bool(_bool):
-  if(_bool):
-    return 0
-  else:
-    return 1
+  return 0 if _bool else 1
 def setup_server(guild):
   try:
     doc = col.find_one({"ser_id":guild.id})
@@ -63,9 +60,9 @@ def change_setting(guild,setting,args):
     doc["st"] = toggle_bool(doc["st"])
   if(setting==2):
     doc["safe"] = toggle_bool(doc["safe"])
-  if(setting==3):
+  if (setting==3):
     for arg in args:
-      if not (arg in doc["slur"]):
+      if arg not in doc["slur"]:
         doc["slur"][arg] = doc["slur"].append(arg)
       else:
         doc["slur"][arg] = doc["slur"].remove(arg)

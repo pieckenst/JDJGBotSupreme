@@ -4,16 +4,16 @@ import DatabaseConfig
 def GetServerPfp(message):
   contents = message.content.split(" ")
   id_bit = 0
- 
+
   try:
     id_bit = int(contents[1])
- 
+
   except:
     id_bit = int(message.guild.id)
-  
+
   guild_fetched=ClientConfig.client.get_guild(id_bit)
-  server_icon= guild_fetched.icon.url if guild_fetched.icon else "https://i.imgur.com/3ZUrjUP.png"
-  return server_icon
+  return (guild_fetched.icon.url
+          if guild_fetched.icon else "https://i.imgur.com/3ZUrjUP.png")
 
 async def get_username(message):
   args = message.content.replace(message.content.split(" ")[0]+" ","")

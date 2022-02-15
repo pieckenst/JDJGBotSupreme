@@ -10,8 +10,7 @@ class MyHelp(commands.MinimalHelpCommand):
 class SendHelp(menus.ListPageSource):
   async def format_page(self, menu, item):
     
-    emby = discord.Embed(description = item, color = 15428885)
-    return emby
+    return discord.Embed(description = item, color = 15428885)
 
 class Help(commands.Cog):
   def __init__(self, bot):
